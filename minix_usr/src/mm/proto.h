@@ -34,6 +34,7 @@ _PROTOTYPE( void mm_exit, (struct mproc *rmp, int exit_status)		);
 
 /* getset.c */
 _PROTOTYPE( int do_getset, (void)					);
+_PROTOTYPE( int do_getprocnr, (void)				);
 
 /* main.c */
 _PROTOTYPE( void main, (void)						);

@@ -192,7 +192,7 @@ PUBLIC do_getprocnr())
   {
     if((mproc[actual].mp_flags & IN_USE) && (mproc[actual].mp_pid == pid))
     {
-      printf("Success")
+      printf("Success:\n")
       return actual;
     }
   }
