@@ -181,7 +181,7 @@ PRIVATE void mm_init()
 
 
 /* Handle of GETPROCNR in SOI Laboratories*/
-PUBLIC do_getprocnr())
+PUBLIC int do_getprocnr()
 {
   /*
   mm_in -> dane zadane wywołaniu
@@ -192,10 +192,8 @@ PUBLIC do_getprocnr())
   {
     if((mproc[actual].mp_flags & IN_USE) && (mproc[actual].mp_pid == pid))
     {
-      printf("Success:\n")
       return actual;
     }
   }
-  printf("Error encountered")
-  return EOENT; //Ended with error
+  return ENOENT; /*Ended with error*/
 }
