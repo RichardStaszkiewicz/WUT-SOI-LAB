@@ -190,7 +190,7 @@ PUBLIC int do_getprocnr()
   int actual;
   for(actual = 0; actual < NR_PROCS; actual++)
   {
-    if((mproc[actual].mp_flags & IN_USE) && (mproc[actual].mp_pid == pid))
+    if(mproc[actual].mp_flags & IN_USE && (mproc[actual].mp_pid == pid))
     {
       return actual;
     }
