@@ -56,29 +56,51 @@ phys_clicks clicks;		/* amount of memory requested */
  * needed for FORK or EXEC.  Swap other processes out if needed.
  */
 
-  register struct hole *hp, *prev_ptr;
+  register struct hole *hp, *prev_ptr, *max_hole, *prev_max_ptr;
   phys_clicks old_base;
-
+  max_hole->h_len = 0;
   do {
 	hp = hole_head;
+  bool done = false;
+
 	while (hp != NIL_HOLE && hp->h_base < swap_base) {
-		if (hp->h_len >= clicks) {
-			/* We found a hole that is big enough.  Use it. */
-			old_base = hp->h_base;	/* remember where it started */
-			hp->h_base += clicks;	/* bite a piece off */
-			hp->h_len -= clicks;	/* ditto */
+    if (global_fit_indicator == 1){
+      if (hp->h_len >= clicks) {
+        /* We found a hole that is big enough.  Use it. */
+        old_base = hp->h_base;	/* remember where it started */
+        hp->h_base += clicks;	/* bite a piece off */
+        hp->h_len -= clicks;	/* ditto */
 
-			/* Delete the hole if used up completely. */
-			if (hp->h_len == 0) del_slot(prev_ptr, hp);
+        /* Delete the hole if used up completely. */
+        if (hp->h_len == 0) del_slot(prev_ptr, hp);
 
-			/* Return the start address of the acquired block. */
-			return(old_base);
-		}
+        /* Return the start address of the acquired block. */
+        return(old_base);
+      }
+    }
+    else{
+      if(hp->h_len > max_hole->h_len){
+        done = true;
+        max_hole = hp;
+        prev_max_ptr = prev_ptr;
+      }
+    }
 
 		prev_ptr = hp;
 		hp = hp->h_next;
 	}
   } while (swap_out());		/* try to swap some other process out */
+  if(done){
+    old_base = max_hole->h_base;	/* remember where it started */
+    max_hole->h_base += clicks;	/* bite a piece off */
+    max_hole->h_len -= clicks;	/* ditto */
+
+    /* Delete the hole if used up completely. */
+    if (max_hole->h_len == 0) del_slot(prev_max_ptr, max_hole);
+
+    /* Return the start address of the acquired block. */
+    return(old_base);
+  }
   return(NO_MEM);
 }
 

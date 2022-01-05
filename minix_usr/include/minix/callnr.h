@@ -1,4 +1,4 @@
-#define NCALLS		  79	/* number of system calls allowed */
+#define NCALLS		  81	/* number of system calls allowed */
 
 #define EXIT		   1 
 #define FORK		   2 
@@ -68,3 +68,5 @@
 
 /*SOI Laboratories syscalls */
 #define GETPROCNR     78
+#define HOLE_MAP      79
+#define WORST_FIT     80

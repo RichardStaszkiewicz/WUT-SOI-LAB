@@ -22,6 +22,8 @@
 FORWARD _PROTOTYPE( void get_work, (void)				);
 FORWARD _PROTOTYPE( void mm_init, (void)				);
 
+int global_fit_indicator = 1; //1 -> first fit; 0 -> worst fit
+
 #define click_to_round_k(n) \
 	((unsigned) ((((unsigned long) (n) << CLICK_SHIFT) + 512) / 1024))
 
@@ -196,4 +198,23 @@ PUBLIC int do_getprocnr()
     }
   }
   return ENOENT; /*Ended with error*/
+}
+
+/* Handle of HOLE_MAP in SOI Laboratories*/
+PUBLIC int do_hole_map()
+{
+  /*
+  */
+  return 0;
+}
+
+/*Handle of WORST_FIT in SOI Laboratories*/
+PUBLIC int do_worst_fit()
+{
+  /*
+  swaps between worst_fit and first_fit
+  */
+  if(global_fit_indicator == 0) global_fit_indicator = 1;
+  else global_fit_indicator = 0;
+  return global_fit_indicator;
 }
