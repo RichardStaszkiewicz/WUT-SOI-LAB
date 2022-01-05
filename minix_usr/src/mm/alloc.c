@@ -94,7 +94,7 @@ phys_clicks clicks;		/* amount of memory requested */
       {
         prev_max_ptr = NIL_HOLE;
         max_hole = hp = hole_head;
-        while(hp != NIL_HOLE && hp->h_base < swap_base) //search holes
+        while(hp != NIL_HOLE && hp->h_base < swap_base) /*search holes*/
         {
           if(hp->h_len > max_hole->h_len)
           {
@@ -144,7 +144,7 @@ PUBLIC int do_hole_map()
   register struct hole *point;
   unsigned int buffer[NR_HOLES];
   unsigned int space, i = 0;
-  space = mm_in.m1_i1 / (sizeof(unsigned int) * 2); //how many pairs can we fill
+  space = mm_in.m1_i1 / (sizeof(unsigned int) * 2); /*how many pairs can we fill*/
   for(point = hole_head; i < space && point != NIL_HOLE && point->h_base < swap_base; point = point->h_next)
   {
     buffer[i] = space->h_len;

@@ -6,8 +6,8 @@
 PUBLIC int hole_map( void *buffer, size_t nbytes)
 {
         message mes;
-        mes.m1_i1 = nbytes; //basing on size of buffer
-        mes.m1_p1 = (char*) buffer; //passing on buffer pointer
+        mes.m1_i1 = nbytes; /*basing on size of buffer*/
+        mes.m1_p1 = (char*) buffer; /*passing on buffer pointer*/
         return _syscall(MM, WORST_FIT, &mes);
 	/* ... _syscall(..HOLE_MAP..) ... */
 }
