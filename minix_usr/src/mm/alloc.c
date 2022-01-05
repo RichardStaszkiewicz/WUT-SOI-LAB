@@ -59,12 +59,12 @@ phys_clicks clicks;		/* amount of memory requested */
   register struct hole *hp, *prev_ptr, *max_hole, *prev_max_ptr;
   phys_clicks old_base;
   max_hole->h_len = 0;
-  do {
-	hp = hole_head;
   bool done = false;
 
+  do {
+	hp = hole_head;
 	while (hp != NIL_HOLE && hp->h_base < swap_base) {
-    if (global_fit_indicator == 1){
+    if (global_fit_indicator == 0){
       if (hp->h_len >= clicks) {
         /* We found a hole that is big enough.  Use it. */
         old_base = hp->h_base;	/* remember where it started */

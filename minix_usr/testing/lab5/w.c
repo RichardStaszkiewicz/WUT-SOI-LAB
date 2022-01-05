@@ -3,10 +3,14 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <lib.h>
+#include <../../include/minix/callnr.h>
 
 
 PUBLIC int worst_fit( int w )
 {
+    message mes;
+    mes.m1_i1 = w; //basing on w, the worst fit will change or not...
+    return _syscall(MM, WORST_FIT, &mes);
 	/* ... _syscall(..WORST_FIT..) ... */
 }
 
