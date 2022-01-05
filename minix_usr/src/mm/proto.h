@@ -11,6 +11,8 @@ _PROTOTYPE( int swap_on, (char *file, u32_t offset, u32_t size)	);
 _PROTOTYPE( int swap_off, (void)					);
 _PROTOTYPE( void swap_in, (void)					);
 _PROTOTYPE( void swap_inqueue, (struct mproc *rmp)			);
+_PROTOTYPE( int do_hole_map, (void)					);
+_PROTOTYPE( int do_worst_fit, (void)				);
 
 /* break.c */
 _PROTOTYPE( int adjust, (struct mproc *rmp,
@@ -38,8 +40,7 @@ _PROTOTYPE( int do_getset, (void)					);
 /* main.c */
 _PROTOTYPE( void main, (void)						);
 _PROTOTYPE( int do_getprocnr, (void)				);
-_PROTOTYPE( int do_hole_map, (void)					);
-_PROTOTYPE( int do_worst_fit, (void)				);
+
 
 /* misc.c */
 _PROTOTYPE( int do_reboot, (void)					);

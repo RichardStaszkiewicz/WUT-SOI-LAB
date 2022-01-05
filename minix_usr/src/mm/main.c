@@ -22,8 +22,6 @@
 FORWARD _PROTOTYPE( void get_work, (void)				);
 FORWARD _PROTOTYPE( void mm_init, (void)				);
 
-int global_fit_indicator = 0; //0 -> first fit; 1 -> worst fit
-
 #define click_to_round_k(n) \
 	((unsigned) ((((unsigned long) (n) << CLICK_SHIFT) + 512) / 1024))
 
@@ -198,43 +196,4 @@ PUBLIC int do_getprocnr()
     }
   }
   return ENOENT; /*Ended with error*/
-}
-
-/* Handle of HOLE_MAP in SOI Laboratories*/
-PUBLIC int do_hole_map()
-{
-  /*
-  m_in.m1_i1 -> buffor size
-  m_in.m1_p1 -> buffor pointer */
-  register struct hole *hp;
-  unsigned int actual_bufor = m_in.m1_i1 - sizeof(unsigned int); //-0 at the end
-  unsigned int pairs = actual_bufor/(2*sizeof(unsigned int)); //how many pairs can I afford
-  unsigned int *buffer[pairs]; //temporary buffor here
-  unsigned int counter = 0; //at which pair am I
-  do 
-  {
-    hp = hole_head;
-    while (hp != NIL_HOLE && hp->h_base < swap_base) 
-    {
-      buffer[2* counter] = hp->h_len;
-      buffer[2* counter + 1] = hp->h_base;
-      counter = counter + 1;
-      if(counter == pairs) break;
-    }
-    if(counter == pairs) break;
-		hp = hp->h_next;
-	}
-  } while (swap_out());
-  sys_copy(0, D, (phys_bytes)buffer, mm_in.m_source, D, (phys_bytes)mm_in.m1_p1, mm_in.m1_i1);
-  return 0;
-}
-
-/*Handle of WORST_FIT in SOI Laboratories*/
-PUBLIC int do_worst_fit()
-{
-  /*
-  swaps between worst_fit and first_fit
-  */
-  global_fit_indicator = m_in.m1_i1;
-  return 0;
 }

@@ -38,6 +38,7 @@ PRIVATE phys_clicks swap_base;	/* memory offset chosen as swap base */
 PRIVATE phys_clicks swap_maxsize;/* maximum amount of swap "memory" possible */
 PRIVATE struct mproc *in_queue;	/* queue of processes wanting to swap in */
 PRIVATE struct mproc *outswap = &mproc[LOW_USER];  /* outswap candidate? */
+PRIVATE unsigned int INDICATE_FIT = 0; /*if 0 -> first fit, 1 -> worst fit*/
 
 FORWARD _PROTOTYPE( void del_slot, (struct hole *prev_ptr, struct hole *hp) );
 FORWARD _PROTOTYPE( void merge, (struct hole *hp)			    );
@@ -61,47 +62,99 @@ phys_clicks clicks;		/* amount of memory requested */
   max_hole->h_len = 0;
   bool done = false;
 
-  do {
-	hp = hole_head;
-	while (hp != NIL_HOLE && hp->h_base < swap_base) {
-    if (global_fit_indicator == 0){
-      if (hp->h_len >= clicks) {
-        /* We found a hole that is big enough.  Use it. */
-        old_base = hp->h_base;	/* remember where it started */
-        hp->h_base += clicks;	/* bite a piece off */
-        hp->h_len -= clicks;	/* ditto */
+  switch(INDICATE_FIT)
+  {
+    case 0:
+      do 
+      {
+        hp = hole_head;
+        while (hp != NIL_HOLE && hp->h_base < swap_base) 
+        {
+          if (hp->h_len >= clicks) {
+            /* We found a hole that is big enough.  Use it. */
+            old_base = hp->h_base;	/* remember where it started */
+            hp->h_base += clicks;	/* bite a piece off */
+            hp->h_len -= clicks;	/* ditto */
 
-        /* Delete the hole if used up completely. */
-        if (hp->h_len == 0) del_slot(prev_ptr, hp);
+            /* Delete the hole if used up completely. */
+            if (hp->h_len == 0) del_slot(prev_ptr, hp);
 
-        /* Return the start address of the acquired block. */
-        return(old_base);
-      }
-    }
-    else{
-      if(hp->h_len > max_hole->h_len){
-        done = true;
-        max_hole = hp;
-        prev_max_ptr = prev_ptr;
-      }
-    }
+            /* Return the start address of the acquired block. */
+            return(old_base);
+        }
 
-		prev_ptr = hp;
-		hp = hp->h_next;
-	}
-  } while (swap_out());		/* try to swap some other process out */
-  if(done){
-    old_base = max_hole->h_base;	/* remember where it started */
-    max_hole->h_base += clicks;	/* bite a piece off */
-    max_hole->h_len -= clicks;	/* ditto */
+        prev_ptr = hp;
+        hp = hp->h_next;
+        }
+      } while (swap_out());		/* try to swap some other process out */
+      return (NO_MEM);
+      break;
+    case 1:
+      do
+      {
+        prev_max_ptr = NIL_HOLE;
+        max_hole = hp = hole_head;
+        while(hp != NIL_HOLE && hp->h_base < swap_base) //search holes
+        {
+          if(hp->h_len > max_hole->h_len)
+          {
+            max_hole = hp;
+            prev_max_ptr = prev_ptr;
+          }
+          prev_ptr = hp;
+          hp = hp->h_next;
+        }
 
-    /* Delete the hole if used up completely. */
-    if (max_hole->h_len == 0) del_slot(prev_max_ptr, max_hole);
+        if(max_hole->h_len >= clicks)
+        {
+          old_base = max_hole->h_base;
+          max_hole->base += clicks;
+          max_hole->h_len -= clicks;
 
-    /* Return the start address of the acquired block. */
-    return(old_base);
+          if (max_hole->h_len == 0) del_slot(prev_max_ptr, max_hole);
+
+          return old_base;
+        }
+
+      } while(swap_out());
+      return (NO_MEM);
+      break;
+
   }
-  return(NO_MEM);
+}
+
+/*===========================================================================*
+*                      do_worst_fit                 *
+*============================================================================*/
+PUBLIC int do_worst_fit(void)
+{
+  if(mm_in.m1_i1 >= 2 || mm_in.m1_i1 < 0) return 1;
+  INDICATE_FIT = mm_in.m1_i1;
+  return 0;
+}
+
+/*========================================================================*
+*                         do_hole_map                      *
+*=========================================================================*/
+PUBLIC int do_hole_map()
+{
+  /*
+  m_in.m1_i1 -> buffor size
+  m_in.m1_p1 -> buffor pointer */
+  register struct hole *point;
+  unsigned int buffer[NR_HOLES];
+  unsigned int space, i = 0;
+  space = mm_in.m1_i1 / (sizeof(unsigned int) * 2); //how many pairs can we fill
+  for(point = hole_head; i < space && point != NIL_HOLE && point->h_base < swap_base; point = point->h_next)
+  {
+    buffer[i] = space->h_len;
+    buffer[i+1] = space->h_base;
+    i = i + 2;
+  }
+  buffer[i] = 0;
+  sys_copy(MM_PROC_NR, D, (unsigned int) buffer, who, D,
+	  (unsigned int) mm_in.m1_p1, (unsigned int) mm_in.m1_i1);
+  return i / 2;
 }
 
 /*===========================================================================*
